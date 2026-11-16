@@ -1,27 +1,233 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cute</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f4f1">
+  <title>Những khoảnh khắc đầu đời</title>
+  <style>
+    :root {
+      --bg: #f7f4f1;
+      --surface: #fffdfa;
+      --ink: #302b2a;
+      --muted: #8d8380;
+      --accent: #c98286;
+      --accent-soft: #f5e5e4;
+      --line: #eee6e2;
+      --shadow: 0 18px 55px rgba(75, 48, 43, .09);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(239, 213, 207, .45), transparent 30rem),
+        var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button { font: inherit; }
+    .page { width: min(1120px, 100% - 36px); margin: 0 auto; padding: 42px 0 56px; }
+    header { text-align: center; margin-bottom: 30px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--accent); font-size: 11px; font-weight: 800;
+      letter-spacing: .19em; text-transform: uppercase;
+    }
+    h1 {
+      margin: 10px 0 8px; font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(30px, 5vw, 46px); font-weight: 500; letter-spacing: -.035em;
+    }
+    .subtitle { margin: 0; color: var(--muted); font-size: 14px; }
+    .layout {
+      display: grid; grid-template-columns: 250px minmax(0, 1fr);
+      gap: 22px; align-items: start;
+    }
+    .sidebar, .viewer {
+      background: rgba(255,253,250,.88); border: 1px solid rgba(255,255,255,.9);
+      border-radius: 22px; box-shadow: var(--shadow);
+    }
+    .sidebar { padding: 18px; position: sticky; top: 18px; }
+    .section-title {
+      margin: 0 0 13px; color: var(--muted); font-size: 11px;
+      font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+    }
+    .choices { display: grid; gap: 9px; }
+    .choice {
+      display: flex; width: 100%; align-items: center; gap: 11px;
+      padding: 9px; border: 1px solid transparent; border-radius: 14px;
+      background: transparent; color: var(--ink); text-align: left;
+      cursor: pointer; transition: .2s ease;
+    }
+    .choice:hover { background: #faf3f1; }
+    .choice.active { background: var(--accent-soft); border-color: #e8c9c8; }
+    .thumb {
+      width: 48px; height: 58px; flex: 0 0 auto; overflow: hidden;
+      border-radius: 9px; background: #f0e9e5;
+    }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .choice-copy { min-width: 0; }
+    .choice-name { display: block; font-size: 13px; font-weight: 700; }
+    .choice-meta { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .viewer { min-width: 0; padding: 18px; }
+    .viewer-top {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; margin: 1px 2px 15px;
+    }
+    .photo-title { margin: 0; font-size: 15px; font-weight: 750; }
+    .counter {
+      padding: 6px 10px; border-radius: 999px; background: #f6efeb;
+      color: #8d7772; font-size: 11px; font-weight: 750; white-space: nowrap;
+    }
+    .photo-stage {
+      min-height: 300px; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; border-radius: 16px; background:
+        linear-gradient(135deg, #f2eeeb, #e9e1dd);
+      padding: clamp(8px, 2vw, 18px);
+    }
+    .photo-stage img {
+      display: block; max-width: 100%; max-height: min(72vh, 780px);
+      width: auto; height: auto; object-fit: contain; border-radius: 8px;
+      box-shadow: 0 10px 32px rgba(48, 35, 32, .13);
+    }
+    .viewer-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 15px 2px 1px;
+    }
+    .hint { color: var(--muted); font-size: 12px; }
+    .nav { display: flex; gap: 8px; }
+    .nav button {
+      width: 38px; height: 38px; border: 1px solid var(--line);
+      border-radius: 50%; background: white; color: var(--ink);
+      cursor: pointer; font-size: 17px; transition: .2s;
+    }
+    .nav button:hover:not(:disabled) { background: var(--accent); color: white; border-color: var(--accent); }
+    .nav button:disabled { opacity: .35; cursor: not-allowed; }
+    .empty-note { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 16px 2px 0; }
+    @media (max-width: 720px) {
+      .page { width: min(100% - 22px, 560px); padding: 28px 0 30px; }
+      header { margin-bottom: 21px; }
+      .layout { grid-template-columns: 1fr; gap: 13px; }
+      .sidebar { position: static; padding: 13px; }
+      .section-title { margin: 0 0 10px 2px; }
+      .choices {
+        display: flex; gap: 8px; overflow-x: auto; padding: 1px 1px 5px;
+        scrollbar-width: thin; scroll-snap-type: x mandatory;
+      }
+      .choice {
+        width: auto; min-width: 142px; flex: 0 0 auto; padding: 7px;
+        scroll-snap-align: start;
+      }
+      .thumb { width: 42px; height: 48px; }
+      .viewer { padding: 11px; border-radius: 18px; }
+      .photo-stage {
+        min-height: 220px; padding: 5px;
+        /* Ảnh tự co theo chiều rộng màn hình, giữ nguyên tỷ lệ và không bị cắt */
+      }
+      .photo-stage img {
+        width: auto; height: auto; max-width: 100%;
+        max-height: calc(100svh - 235px); object-fit: contain;
+      }
+      .hint { font-size: 11px; }
+    }
+    @media (max-width: 380px) {
+      .choice { min-width: 128px; }
+      .choice-name { font-size: 12px; }
+      .photo-stage img { max-height: calc(100svh - 220px); }
+    }
+  </style>
 </head>
-<body bgcolor="black", align="center">
-    <div class="container">
+<body>
+  <main class="page">
+    <header>
+      <div class="eyebrow">♡ &nbsp; A little gallery</div>
+      <h1>Quá trình bé Chill lớn khôn</h1>
+      <p class="subtitle">Lưu giữ những điều nhỏ bé, dịu dàng và đáng nhớ.</p>
+    </header>
 
-    </select>
-        <div class="image-container">
-            <img id="qualityImage" src="images/newborn.png" alt="Video Quality">
+    <section class="layout" aria-label="Thư viện ảnh">
+      <aside class="sidebar">
+        <h2 class="section-title">Choose the moment</h2>
+        <div class="choices" id="choices"></div>
+        <p class="empty-note">Chạm vào từng mục để xem ảnh tương ứng. Có thể vuốt ngang danh sách trên điện thoại.</p>
+      </aside>
+
+      <section class="viewer" aria-live="polite">
+        <div class="viewer-top">
+          <h2 class="photo-title" id="photoTitle">Newborn</h2>
+          <span class="counter" id="counter">01 / 01</span>
         </div>
-        <h1>Choose the moment</h1>
-        <select id="qualitySelect" onchange="changeImage()">
-            <option value="newborn">New born</option>
-            <option value="240p">1 month</option>
-            <option value="480p">2 months</option>
-            <option value="720p">3 months</option>
-            <option value="1080p">4 months</option>
-        
-    </div>
-    <script src="script.js"></script>
+        <div class="photo-stage">
+          <img id="mainImage" alt="Em bé đang ngủ" src="images/newborn.png">
+        </div>
+        <div class="viewer-bottom">
+          <span class="hint">Ảnh được tự căn chỉnh, không cắt mất nội dung.</span>
+          <div class="nav">
+            <button id="prevBtn" type="button" aria-label="Ảnh trước" disabled>‹</button>
+            <button id="nextBtn" type="button" aria-label="Ảnh tiếp theo" disabled>›</button>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // Thêm ảnh mới tại đây: mỗi phần tử tương ứng một mục và một ảnh.
+    // Với ảnh nằm cùng thư mục, dùng src: "ten-anh.jpg".
+    const photos = [
+      {
+        title: "Newborn",
+        date: "Khoảnh khắc đáng yêu",
+        src: "images/newborn.png",
+        alt: "Em bé đang ngủ"
+      }
+      // Ví dụ:
+      // { title: "Ngày thứ hai", date: "Một ngày bình yên", src: "anh-02.jpg", alt: "..." },
+      // { title: "Lần đầu mỉm cười", date: "Kỷ niệm", src: "anh-03.jpg", alt: "..." }
+    ];
+
+    const choices = document.getElementById("choices");
+    const mainImage = document.getElementById("mainImage");
+    const photoTitle = document.getElementById("photoTitle");
+    const counter = document.getElementById("counter");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    let activeIndex = 0;
+
+    function renderChoices() {
+      choices.innerHTML = "";
+      photos.forEach((photo, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice" + (index === activeIndex ? " active" : "");
+        button.setAttribute("aria-pressed", index === activeIndex ? "true" : "false");
+        button.innerHTML = `
+          <span class="thumb"><img src="${photo.src}" alt="" loading="lazy"></span>
+          <span class="choice-copy">
+            <span class="choice-name">${photo.title}</span>
+            <span class="choice-meta">${photo.date || "Kỷ niệm"}</span>
+          </span>`;
+        button.addEventListener("click", () => showPhoto(index));
+        choices.appendChild(button);
+      });
+    }
+
+    function showPhoto(index) {
+      if (!photos.length) return;
+      activeIndex = (index + photos.length) % photos.length;
+      const photo = photos[activeIndex];
+      mainImage.src = photo.src;
+      mainImage.alt = photo.alt || photo.title;
+      photoTitle.textContent = photo.title;
+      counter.textContent = `${String(activeIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+      prevBtn.disabled = photos.length < 2;
+      nextBtn.disabled = photos.length < 2;
+      renderChoices();
+    }
+
+    prevBtn.addEventListener("click", () => showPhoto(activeIndex - 1));
+    nextBtn.addEventListener("click", () => showPhoto(activeIndex + 1));
+    showPhoto(0);
+  </script>
 </body>
 </html>
